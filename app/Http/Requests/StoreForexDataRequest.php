@@ -20,7 +20,7 @@ class StoreForexDataRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'userid' => 'required|uuid',
+            'forexspy_user_uuid' => 'required|uuid',
 
             'account' => 'required|array',
             'account.AccountLogin' => 'required|integer',
@@ -56,46 +56,46 @@ class StoreForexDataRequest extends FormRequest
             'account.AccountCompany' => 'required|string',
 
             'open' => 'required|array',
-            'open.OrderTicket' => 'required',
-            'open.OrderSymbol' => 'required|string',
-            'open.OrderType' => [
+            'open.*.OrderTicket' => 'required',
+            'open.*.OrderSymbol' => 'required|string',
+            'open.*.OrderType' => [
                 'required',
                 Rule::in(OpenTrade::$type)
             ],
-            'open.OrderLots' => 'required|numeric',
-            'open.OrderCommission' => 'required|numeric',
-            'open.OrderProfit' => 'required|numeric',
-            'open.OrderStopLoss' => 'required|numeric',
-            'open.OrderSwap' => 'required|numeric',
-            'open.OrderTakeProfit' => 'required|numeric',
-            'open.OrderMagicNumber' => 'required',
-            'open.OrderComment' => 'nullable|string',
-            'open.OrderOpenPrice' => 'required|numeric',
-            'open.OrderOpenTime' => 'required|date',
-            'open.OrderClosePrice' => 'nullable|numeric',
-            'open.OrderCloseTime' => 'nullable|date',
-            'open.OrderExpiration' => 'nullable|date',
+            'open.*.OrderLots' => 'required|numeric',
+            'open.*.OrderCommission' => 'required|numeric',
+            'open.*.OrderProfit' => 'required|numeric',
+            'open.*.OrderStopLoss' => 'required|numeric',
+            'open.*.OrderSwap' => 'required|numeric',
+            'open.*.OrderTakeProfit' => 'required|numeric',
+            'open.*.OrderMagicNumber' => 'required',
+            'open.*.OrderComment' => 'nullable|string',
+            'open.*.OrderOpenPrice' => 'required|numeric',
+            'open.*.OrderOpenTime' => 'required',
+            'open.*.OrderClosePrice' => 'nullable|numeric',
+            'open.*.OrderCloseTime' => 'nullable',
+            'open.*.OrderExpiration' => 'nullable',
 
             'close' => 'required|array',
-            'close.OrderTicket' => 'required',
-            'close.OrderSymbol' => 'required|string',
-            'close.OrderType' => [
+            'close.*.OrderTicket' => 'required',
+            'close.*.OrderSymbol' => 'required|string',
+            'close.*.OrderType' => [
                 'required',
                 Rule::in(CloseTrade::$type)
             ],
-            'close.OrderLots' => 'required|numeric',
-            'close.OrderCommission' => 'required|numeric',
-            'close.OrderProfit' => 'required|numeric',
-            'close.OrderStopLoss' => 'required|numeric',
-            'close.OrderSwap' => 'required|numeric',
-            'close.OrderTakeProfit' => 'required|numeric',
-            'close.OrderMagicNumber' => 'required',
-            'close.OrderComment' => 'nullable|string',
-            'close.OrderOpenPrice' => 'required|numeric',
-            'close.OrderOpenTime' => 'required|date',
-            'close.OrderClosePrice' => 'required|numeric',
-            'close.OrderCloseTime' => 'required|date',
-            'close.OrderExpiration' => 'nullable|date',
+            'close.*.OrderLots' => 'required|numeric',
+            'close.*.OrderCommission' => 'required|numeric',
+            'close.*.OrderProfit' => 'required|numeric',
+            'close.*.OrderStopLoss' => 'required|numeric',
+            'close.*.OrderSwap' => 'required|numeric',
+            'close.*.OrderTakeProfit' => 'required|numeric',
+            'close.*.OrderMagicNumber' => 'required',
+            'close.*.OrderComment' => 'nullable|string',
+            'close.*.OrderOpenPrice' => 'required|numeric',
+            'close.*.OrderOpenTime' => 'required',
+            'close.*.OrderClosePrice' => 'required|numeric',
+            'close.*.OrderCloseTime' => 'required',
+            'close.*.OrderExpiration' => 'nullable',
         ];
     }
 

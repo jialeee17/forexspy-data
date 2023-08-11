@@ -12,7 +12,7 @@ class ForexRepository implements ForexRepositoryInterface
 {
     public function storeData($request)
     {
-        $telegramUserId = $request->userid;
+        $telegramUserUuid = $request->forexspy_user_uuid;
         $account = $request->account;
         $openTrade = $request->open;
         $closeTrade = $request->close;
@@ -20,9 +20,9 @@ class ForexRepository implements ForexRepositoryInterface
         $abbreviation = Helper::generateAbbreviation($account['AccountCompany']);
 
         $data = [
-            'account' => $this->storeAccount($account, $telegramUserId),
-            'open_trade' => $this->storeTrades($openTrade, $telegramUserId, $abbreviation, OpenTrade::class),
-            'close_trade' => $this->storeTrades($closeTrade, $telegramUserId, $abbreviation, CloseTrade::class)
+            'account' => $this->storeAccount($account, $telegramUserUuid),
+            'open_trade' => $this->storeTrades($openTrade, $telegramUserUuid, $abbreviation, OpenTrade::class),
+            'close_trade' => $this->storeTrades($closeTrade, $telegramUserUuid, $abbreviation, CloseTrade::class)
         ];
 
         Helper::sendWebhook(['account' => $data['account']]);
@@ -30,7 +30,7 @@ class ForexRepository implements ForexRepositoryInterface
         return $data;
     }
 
-    protected function storeAccount($account, $telegramUserId)
+    protected function storeAccount($account, $telegramUserUuid)
     {
         if (empty($account)) {
             return null;
@@ -38,7 +38,7 @@ class ForexRepository implements ForexRepositoryInterface
 
         $account = Account::create([
             'login_id' => $account['AccountLogin'],
-            'telegram_user_uuid' => $telegramUserId,
+            'telegram_user_uuid' => $telegramUserUuid,
             'trade_mode' => $account['AccountTradeMode'],
             'leverage' => $account['AccountLeverage'],
             'limit_orders' => $account['AccountLimitOrders'],
@@ -68,31 +68,37 @@ class ForexRepository implements ForexRepositoryInterface
         return $account;
     }
 
-    protected function storeTrades($data, $telegramUserId, $companyAbbreviation, $model)
+    protected function storeTrades($data, $telegramUserUuid, $companyAbbreviation, $model)
     {
         if (empty($data)) {
             return null;
         }
 
-        $trade = $model::create([
-            'telegram_user_uuid' => $telegramUserId,
-            'ticket' => $companyAbbreviation . $data['OrderTicket'],
-            'symbol' => $data['OrderSymbol'],
-            'type' => $data['OrderType'],
-            'lots' => $data['OrderLots'],
-            'commission' => $data['OrderCommission'],
-            'profit' => $data['OrderProfit'],
-            'stop_loss' => $data['OrderStopLoss'],
-            'swap' => $data['OrderSwap'],
-            'take_profit' => $data['OrderTakeProfit'],
-            'magic_number' => $data['OrderMagicNumber'],
-            'comment' => $data['OrderComment'],
-            'open_price' => $data['OrderOpenPrice'],
-            'open_at' => $data['OrderOpenTime'],
-            'close_price' => $data['OrderClosePrice'],
-            'close_at' => $data['OrderCloseTime'],
-            'expired_at' => $data['OrderExpiration']
-        ]);
+        $openTrades = [];
+
+        foreach($data as $d) {
+            $openTrades[] = [
+                'telegram_user_uuid' => $telegramUserUuid,
+                'ticket' => $companyAbbreviation . $d['OrderTicket'],
+                'symbol' => $d['OrderSymbol'],
+                'type' => $d['OrderType'],
+                'lots' => $d['OrderLots'],
+                'commission' => $d['OrderCommission'],
+                'profit' => $d['OrderProfit'],
+                'stop_loss' => $d['OrderStopLoss'],
+                'swap' => $d['OrderSwap'],
+                'take_profit' => $d['OrderTakeProfit'],
+                'magic_number' => $d['OrderMagicNumber'],
+                'comment' => $d['OrderComment'] ?? null,
+                'open_price' => $d['OrderOpenPrice'],
+                'open_at' => $d['OrderOpenTime'],
+                'close_price' => $d['OrderClosePrice'] ?? null,
+                'close_at' => $d['OrderCloseTime'] ?? null,
+                'expired_at' => $d['OrderExpiration'] ?? null
+            ];
+        }
+
+        $trade = $model::insert($openTrades);
 
         return $trade;
     }
