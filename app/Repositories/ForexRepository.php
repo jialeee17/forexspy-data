@@ -74,10 +74,10 @@ class ForexRepository implements ForexRepositoryInterface
             return null;
         }
 
-        $openTrades = [];
+        $trades = [];
 
         foreach($data as $d) {
-            $openTrades[] = [
+            $trades[] = [
                 'telegram_user_uuid' => $telegramUserUuid,
                 'ticket' => $companyAbbreviation . $d['OrderTicket'],
                 'symbol' => $d['OrderSymbol'],
@@ -98,7 +98,7 @@ class ForexRepository implements ForexRepositoryInterface
             ];
         }
 
-        $trade = $model::insert($openTrades);
+        $trade = $model::insert($trades);
 
         return $trade;
     }
