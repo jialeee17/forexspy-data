@@ -36,34 +36,38 @@ class ForexRepository implements ForexRepositoryInterface
             return null;
         }
 
-        $account = Account::create([
-            'login_id' => $account['AccountLogin'],
-            'telegram_user_uuid' => $telegramUserUuid,
-            'trade_mode' => $account['AccountTradeMode'],
-            'leverage' => $account['AccountLeverage'],
-            'limit_orders' => $account['AccountLimitOrders'],
-            'margin_so_mode' => $account['AccountMarginSOMode'],
-            'is_trade_allowed' => $account['AccountTradeAllowed'],
-            'is_trade_expert' => $account['AccountTradeExpert'],
-            'balance' => $account['AccountBalance'],
-            'credit' => $account['AccountCredit'],
-            'profit' => $account['AccountProfit'],
-            'equity' => $account['AccountEquity'],
-            'margin' => $account['AccountMargin'],
-            'margin_free' => $account['AccountMarginFree'],
-            'margin_level' => $account['AccountMarginLevel'],
-            'margin_so_call' => $account['AccountMarginSOCall'],
-            'margin_so_so' => $account['AccountMarginSOSO'],
-            'margin_initial' => $account['AccountMarginInitial'],
-            'margin_maintenance' => $account['AccountMarginMaintenance'],
-            'assets' => $account['AccountAssets'],
-            'liabilities' => $account['AccountLiabilities'],
-            'commission_blocked' => $account['AccountCommissionBlocked'],
-            'name' => $account['AccountName'],
-            'server' => $account['AccountServer'],
-            'currency' => $account['AccountCurrency'],
-            'company' => $account['AccountCompany']
-        ]);
+        $account = Account::updateOrCreate(
+            [
+                'login_id' => $account['AccountLogin'],
+            ],
+            [
+                'telegram_user_uuid' => $telegramUserUuid,
+                'trade_mode' => $account['AccountTradeMode'],
+                'leverage' => $account['AccountLeverage'],
+                'limit_orders' => $account['AccountLimitOrders'],
+                'margin_so_mode' => $account['AccountMarginSOMode'],
+                'is_trade_allowed' => $account['AccountTradeAllowed'],
+                'is_trade_expert' => $account['AccountTradeExpert'],
+                'balance' => $account['AccountBalance'],
+                'credit' => $account['AccountCredit'],
+                'profit' => $account['AccountProfit'],
+                'equity' => $account['AccountEquity'],
+                'margin' => $account['AccountMargin'],
+                'margin_free' => $account['AccountMarginFree'],
+                'margin_level' => $account['AccountMarginLevel'],
+                'margin_so_call' => $account['AccountMarginSOCall'],
+                'margin_so_so' => $account['AccountMarginSOSO'],
+                'margin_initial' => $account['AccountMarginInitial'],
+                'margin_maintenance' => $account['AccountMarginMaintenance'],
+                'assets' => $account['AccountAssets'],
+                'liabilities' => $account['AccountLiabilities'],
+                'commission_blocked' => $account['AccountCommissionBlocked'],
+                'name' => $account['AccountName'],
+                'server' => $account['AccountServer'],
+                'currency' => $account['AccountCurrency'],
+                'company' => $account['AccountCompany']
+            ]
+        );
 
         return $account;
     }
@@ -98,7 +102,11 @@ class ForexRepository implements ForexRepositoryInterface
             ];
         }
 
-        $trade = $model::insert($trades);
+        $trade = $model::upsert(
+            $trades,
+            ['ticket'],
+            ['telegram_user_uuid', 'symbol', 'type', 'lots', 'commission', 'profit', 'stop_loss', 'swap', 'take_profit', 'magic_number', 'comment', 'open_price', 'open_at', 'close_price', 'close_at', 'expired_at']
+        );
 
         return $trade;
     }
