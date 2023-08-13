@@ -21,8 +21,8 @@ class ForexRepository implements ForexRepositoryInterface
 
         $data = [
             'account' => $this->storeAccount($account, $telegramUserUuid),
-            'open_trade' => $this->storeTrades($openTrade, $telegramUserUuid, $abbreviation, OpenTrade::class),
-            'close_trade' => $this->storeTrades($closeTrade, $telegramUserUuid, $abbreviation, CloseTrade::class)
+            'open_trade' => $this->storeTrades($openTrade, $account['AccountLogin'], $telegramUserUuid, $abbreviation, OpenTrade::class),
+            'close_trade' => $this->storeTrades($closeTrade, $account['AccountLogin'], $telegramUserUuid, $abbreviation, CloseTrade::class)
         ];
 
         Helper::sendWebhook(['account' => $data['account']]);
@@ -72,7 +72,7 @@ class ForexRepository implements ForexRepositoryInterface
         return $account;
     }
 
-    protected function storeTrades($data, $telegramUserUuid, $companyAbbreviation, $model)
+    protected function storeTrades($data, $loginId, $telegramUserUuid, $companyAbbreviation, $model)
     {
         if (empty($data)) {
             return null;
@@ -82,6 +82,7 @@ class ForexRepository implements ForexRepositoryInterface
 
         foreach($data as $d) {
             $trades[] = [
+                'login_id' => $loginId,
                 'telegram_user_uuid' => $telegramUserUuid,
                 'ticket' => $companyAbbreviation . $d['OrderTicket'],
                 'symbol' => $d['OrderSymbol'],
@@ -105,7 +106,7 @@ class ForexRepository implements ForexRepositoryInterface
         $trade = $model::upsert(
             $trades,
             ['ticket'],
-            ['telegram_user_uuid', 'symbol', 'type', 'lots', 'commission', 'profit', 'stop_loss', 'swap', 'take_profit', 'magic_number', 'comment', 'open_price', 'open_at', 'close_price', 'close_at', 'expired_at']
+            ['login_id', 'telegram_user_uuid', 'symbol', 'type', 'lots', 'commission', 'profit', 'stop_loss', 'swap', 'take_profit', 'magic_number', 'comment', 'open_price', 'open_at', 'close_price', 'close_at', 'expired_at']
         );
 
         return $trade;

@@ -10,6 +10,7 @@ class OpenTrade extends Model
     use HasFactory;
 
     protected $fillable = [
+        'login_id',
         'telegram_user_uuid',
         'ticket',
         'symbol',
@@ -27,6 +28,14 @@ class OpenTrade extends Model
         'close_price',
         'close_at',
         'expired_at'
+    ];
+
+    protected $casts = [
+        'open_at' => 'datetime:Y-m-d H:i:s',
+        'close_at' => 'datetime:Y-m-d H:i:s',
+        'expired_at' => 'datetime:Y-m-d H:i:s',
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s'
     ];
 
     const TYPE_BUY = 'buy';
