@@ -55,7 +55,7 @@ class StoreForexDataRequest extends FormRequest
             'account.AccountCurrency' => 'required|string',
             'account.AccountCompany' => 'required|string',
 
-            'open' => 'required|array',
+            'open' => 'nullable|array',
             'open.*.OrderTicket' => 'required',
             'open.*.OrderSymbol' => 'required|string',
             'open.*.OrderType' => [
@@ -76,7 +76,7 @@ class StoreForexDataRequest extends FormRequest
             'open.*.OrderCloseTime' => 'nullable',
             'open.*.OrderExpiration' => 'nullable',
 
-            'close' => 'required|array',
+            'close' => 'nullable|array',
             'close.*.OrderTicket' => 'required',
             'close.*.OrderSymbol' => 'required|string',
             'close.*.OrderType' => [
