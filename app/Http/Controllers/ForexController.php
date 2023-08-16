@@ -20,7 +20,6 @@ class ForexController extends Controller
 
     public function storeData(StoreForexDataRequest $request)
     {
-
         try {
             $data = $this->forexRepository->storeData($request);
 

@@ -27,7 +27,8 @@ class CloseTrade extends Model
         'open_at',
         'close_price',
         'close_at',
-        'expired_at'
+        'expired_at',
+        'is_notified'
     ];
 
     protected $casts = [

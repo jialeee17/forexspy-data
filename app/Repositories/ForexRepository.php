@@ -16,6 +16,7 @@ class ForexRepository implements ForexRepositoryInterface
         $account = $request->account;
         $openTrade = $request->open;
         $closeTrade = $request->close;
+        $hasClosedTrades = !empty($closeTrade) ? true : false;
 
         $abbreviation = Helper::generateAbbreviation($account['AccountCompany']);
 
@@ -25,7 +26,11 @@ class ForexRepository implements ForexRepositoryInterface
             'close_trade' => $this->storeTrades($closeTrade, $account['AccountLogin'], $telegramUserUuid, $abbreviation, CloseTrade::class)
         ];
 
-        Helper::sendWebhook(['account' => $data['account']]);
+        /**
+         * The 'has_closed_trades' flag determines if querying for unnotified close trades is needed within the Forex Spy Process.
+         * If the incoming data does not include close trades, there is no need to notify the user.
+         */
+        Helper::sendWebhook(['account' => $data['account'], 'has_closed_trades' => $hasClosedTrades]);
 
         return $data;
     }
@@ -103,12 +108,12 @@ class ForexRepository implements ForexRepositoryInterface
             ];
         }
 
-        $trade = $model::upsert(
+        $model::upsert(
             $trades,
             ['ticket'],
             ['login_id', 'telegram_user_uuid', 'symbol', 'type', 'lots', 'commission', 'profit', 'stop_loss', 'swap', 'take_profit', 'magic_number', 'comment', 'open_price', 'open_at', 'close_price', 'close_at', 'expired_at']
         );
 
-        return $trade;
+        return $trades;
     }
 }

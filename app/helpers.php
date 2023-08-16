@@ -22,7 +22,7 @@ class Helper {
         WebhookCall::create()
             ->url(env('WEBHOOK_URL', 'https://process.forexspy.pro/webhooks'))
             ->payload($data)
-            ->useSecret(env('WEBHOOK_CLIENT_SECRET'))
+            ->useSecret(env('WEBHOOK_SECRET'))
             ->dispatch();
     }
 }
