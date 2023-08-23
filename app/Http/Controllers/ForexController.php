@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Throwable;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Repositories\ForexRepository;
 use App\Http\Responses\ApiErrorResponse;
 use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Requests\StoreForexDataRequest;
-use GuzzleHttp\Psr7\Request;
 
 class ForexController extends Controller
 {
