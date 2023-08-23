@@ -8,6 +8,7 @@ use App\Repositories\ForexRepository;
 use App\Http\Responses\ApiErrorResponse;
 use App\Http\Responses\ApiSuccessResponse;
 use App\Http\Requests\StoreForexDataRequest;
+use GuzzleHttp\Psr7\Request;
 
 class ForexController extends Controller
 {
@@ -18,7 +19,7 @@ class ForexController extends Controller
         $this->forexRepository = $forexRepository;
     }
 
-    public function storeData(StoreForexDataRequest $request)
+    public function storeData(Request $request)
     {
         try {
             $data = $this->forexRepository->storeData($request);
