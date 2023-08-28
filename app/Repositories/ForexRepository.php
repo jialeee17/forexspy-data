@@ -17,20 +17,21 @@ class ForexRepository implements ForexRepositoryInterface
         $openTrade = $request->open;
         $closeTrade = $request->close;
         $hasClosedTrades = !empty($closeTrade) ? true : false;
+        $isHistorical = $request->is_historical;
 
         $abbreviation = Helper::generateAbbreviation($account['AccountCompany']);
 
         $data = [
             'account' => $this->storeAccount($account, $telegramUserUuid),
-            'open_trade' => $this->storeTrades($openTrade, $account['AccountLogin'], $telegramUserUuid, $abbreviation, OpenTrade::class),
-            'close_trade' => $this->storeTrades($closeTrade, $account['AccountLogin'], $telegramUserUuid, $abbreviation, CloseTrade::class)
+            'open_trade' => $this->storeTrades($openTrade, $account['AccountLogin'], $telegramUserUuid, $abbreviation, $isHistorical, OpenTrade::class),
+            'close_trade' => $this->storeTrades($closeTrade, $account['AccountLogin'], $telegramUserUuid, $abbreviation, $isHistorical, CloseTrade::class)
         ];
 
         /**
          * The 'has_closed_trades' flag determines if querying for unnotified close trades is needed within the Forex Spy Process.
          * If the incoming data does not include close trades, there is no need to notify the user.
          */
-        Helper::sendWebhook(['account' => $data['account'], 'has_closed_trades' => $hasClosedTrades]);
+        Helper::sendWebhook(['account' => $data['account'], 'has_closed_trades' => $hasClosedTrades, 'is_historical' => $isHistorical]);
 
         return $data;
     }
@@ -77,7 +78,7 @@ class ForexRepository implements ForexRepositoryInterface
         return $account;
     }
 
-    protected function storeTrades($data, $loginId, $telegramUserUuid, $companyAbbreviation, $model)
+    protected function storeTrades($data, $loginId, $telegramUserUuid, $companyAbbreviation, $isHistorical, $model)
     {
         if (empty($data)) {
             return null;
@@ -104,7 +105,8 @@ class ForexRepository implements ForexRepositoryInterface
                 'open_at' => $d['OrderOpenTime'],
                 'close_price' => $d['OrderClosePrice'] ?? null,
                 'close_at' => $d['OrderCloseTime'] ?? null,
-                'expired_at' => $d['OrderExpiration'] ?? null
+                'expired_at' => $d['OrderExpiration'] ?? null,
+                'is_notified' => $isHistorical ? 1 : 0
             ];
         }
 
