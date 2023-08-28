@@ -17,7 +17,7 @@ class ForexRepository implements ForexRepositoryInterface
         $openTrade = $request->open;
         $closeTrade = $request->close;
         $hasClosedTrades = !empty($closeTrade) ? true : false;
-        $isHistorical = $request->is_historical;
+        $isHistorical = $request->is_historical === 'true' ? true : false;
 
         $abbreviation = Helper::generateAbbreviation($account['AccountCompany']);
 
@@ -106,7 +106,7 @@ class ForexRepository implements ForexRepositoryInterface
                 'close_price' => $d['OrderClosePrice'] ?? null,
                 'close_at' => $d['OrderCloseTime'] ?? null,
                 'expired_at' => $d['OrderExpiration'] ?? null,
-                'is_notified' => $isHistorical === 'true' ? 1 : 0
+                'is_notified' => $isHistorical ? 1 : 0
             ];
         }
 
