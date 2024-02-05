@@ -6,23 +6,23 @@ return [
     /*                                    CRUD                                    */
     /* -------------------------------------------------------------------------- */
     'create' => [
-        'success' => ':resource created successfully.',
-        'error' => 'Failed to create :resource. Please check your input and try again.'
+        'success' => ':name created successfully.',
+        'error' => 'Failed to create :name. Please check your input and try again.'
     ],
 
     'read' => [
-        'success' => ':resource retrieved successfully.',
-        'error' => 'Failed to retrieve :resource. Please ensure the :resource exists and try again.'
+        'success' => ':name retrieved successfully.',
+        'error' => 'Failed to retrieve :name. Please ensure the :name exists and try again.'
     ],
 
     'update' => [
-        'success' => ':resource updated successfully.',
-        'error' => 'Failed to update :resource. Please check your input and try again.'
+        'success' => ':name updated successfully.',
+        'error' => 'Failed to update :name. Please check your input and try again.'
     ],
 
     'delete' => [
-        'success' => ':resource deleted successfully.',
-        'error' => 'Failed to delete :resource. Please ensure the :resource exists and try again.'
+        'success' => ':name deleted successfully.',
+        'error' => 'Failed to delete :name. Please ensure the :name exists and try again.'
     ],
 
 ];
