@@ -38,12 +38,4 @@ class OpenTrade extends Model
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s'
     ];
-
-    const TYPE_BUY = 'buy';
-    const TYPE_SELL = 'sell';
-
-    public static $type = [
-        self::TYPE_BUY,
-        self::TYPE_SELL
-    ];
 }

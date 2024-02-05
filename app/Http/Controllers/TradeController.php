@@ -3,30 +3,29 @@
 namespace App\Http\Controllers;
 
 use Throwable;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Repositories\ForexRepository;
+use App\Services\TradeService;
 use App\Http\Responses\ApiErrorResponse;
+use App\Http\Requests\StoreTradesRequest;
 use App\Http\Responses\ApiSuccessResponse;
-use App\Http\Requests\StoreForexDataRequest;
 
-class ForexController extends Controller
+class TradeController extends Controller
 {
-    private $forexRepository;
+    private $tradeService;
 
-    public function __construct(ForexRepository $forexRepository)
+    public function __construct(TradeService $tradeService)
     {
-        $this->forexRepository = $forexRepository;
+        $this->tradeService = $tradeService;
     }
 
-    public function storeData(StoreForexDataRequest $request)
+    public function storeTrades(StoreTradesRequest $request)
     {
         try {
-            $data = $this->forexRepository->storeData($request);
+            $data = $this->tradeService->storeTrades($request);
 
             return new ApiSuccessResponse(
                 $data,
-                __('common.create.success', ['resource' => 'Forex Data']),
+                __('common.create.success', ['name' => 'Forex Data']),
                 Response::HTTP_CREATED
             );
         } catch (Throwable $exception) {

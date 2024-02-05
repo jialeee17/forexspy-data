@@ -43,22 +43,4 @@ class Account extends Model
         'currency',
         'company'
     ];
-
-    const TRADE_MODE_DEMO = 'demo';
-    const TRADE_MODE_CONTEST = 'contest';
-    const TRADE_MODE_REAL = 'real';
-
-    const MARGIN_SO_MODE_PERCENT = 'percent';
-    const MARGIN_SO_MODE_MONEY = 'money';
-
-    public static $trade_mode = [
-        self::TRADE_MODE_DEMO,
-        self::TRADE_MODE_CONTEST,
-        self::TRADE_MODE_REAL
-    ];
-
-    public static $margin_so_mode = [
-        self::MARGIN_SO_MODE_PERCENT,
-        self::MARGIN_SO_MODE_MONEY
-    ];
 }
