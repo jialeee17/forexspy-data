@@ -15,5 +15,7 @@ use App\Http\Controllers\TradeController;
 */
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('store-trades', [TradeController::class, 'storeTrades']);
+    Route::prefix('trades')->name('trade.')->group(function () {
+        Route::post('/', [TradeController::class, 'store']);
+    });
 });

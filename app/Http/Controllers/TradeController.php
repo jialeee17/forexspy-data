@@ -18,7 +18,7 @@ class TradeController extends Controller
         $this->tradeService = $tradeService;
     }
 
-    public function storeTrades(StoreTradesRequest $request)
+    public function store(StoreTradesRequest $request)
     {
         try {
             $data = $this->tradeService->storeTrades($request);
