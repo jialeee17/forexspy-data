@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('trades', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('account_login_id')->references('login_id')->on('accounts');
+            $table->unsignedBigInteger('account_login_id')->references('login_id')->on('accounts');
             $table->string('ticket')->unique();
             $table->string('symbol');
             $table->enum('type', ['buy', 'sell']);
