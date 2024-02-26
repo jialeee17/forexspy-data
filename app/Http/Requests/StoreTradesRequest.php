@@ -8,8 +8,6 @@ use Illuminate\Validation\Rule;
 use App\Enums\MarginSOModesEnum;
 use App\Enums\OrderStatusesEnum;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreTradesRequest extends FormRequest
 {
@@ -76,7 +74,7 @@ class StoreTradesRequest extends FormRequest
             'trades.*.OrderTakeProfit' => ['required', 'numeric'],
             'trades.*.OrderMagicNumber' => ['required'],
             'trades.*.OrderComment' => ['nullable', 'string'],
-            'trades.*.Status' => ['required', Rule::enum(OrderStatusesEnum::class)],
+            'trades.*.OrderStatus' => ['required', Rule::enum(OrderStatusesEnum::class)],
             'trades.*.OrderOpenPrice' => ['required', 'numeric'],
             'trades.*.OrderOpenTime' => ['required'],
             'trades.*.OrderClosePrice' => ['nullable', 'numeric'],
@@ -133,7 +131,7 @@ class StoreTradesRequest extends FormRequest
             'trades.*.OrderTakeProfit' => 'Order Take Profit (Open)',
             'trades.*.OrderMagicNumber' => 'Order Magic Number (Open)',
             'trades.*.OrderComment' => 'Order Comment (Open)',
-            'trades.*.Status' => 'Order Status',
+            'trades.*.OrderStatus' => 'Order Status',
             'trades.*.OrderOpenPrice' => 'Order Open Price (Open)',
             'trades.*.OrderOpenTime' => 'Order Open Time (Open)',
             'trades.*.OrderClosePrice' => 'Order Close Price (Open)',

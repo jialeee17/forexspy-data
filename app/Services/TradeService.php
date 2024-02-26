@@ -76,6 +76,7 @@ class TradeService
                 'take_profit' => $trade['OrderTakeProfit'],
                 'magic_number' => $trade['OrderMagicNumber'],
                 'comment' => $trade['OrderComment'] ?? null,
+                'status' => $trade['OrderStatus'],
                 'open_price' => $trade['OrderOpenPrice'],
                 'open_at' => $trade['OrderOpenTime'],
                 'close_price' => $trade['OrderClosePrice'] ?? null,
