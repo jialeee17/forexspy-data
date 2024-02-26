@@ -59,39 +59,47 @@ class TradeService
         );
 
         // Upsert Trades
-        $arr = [];
-        $abbreviation = Helper::generateAbbreviation($accountDetails['AccountCompany']);
+        if ($trades) {
+            $arr = [];
+            $abbreviation = Helper::generateAbbreviation($accountDetails['AccountCompany']);
 
-        foreach ($trades as $trade) {
-            $arr[] = [
-                'account_login_id' => $accountDetails['AccountLogin'],
-                'ticket' => $abbreviation . $trade['OrderTicket'],
-                'symbol' => $trade['OrderSymbol'],
-                'type' => $trade['OrderType'],
-                'lots' => $trade['OrderLots'],
-                'commission' => $trade['OrderCommission'],
-                'profit' => $trade['OrderProfit'],
-                'stop_loss' => $trade['OrderStopLoss'],
-                'swap' => $trade['OrderSwap'],
-                'take_profit' => $trade['OrderTakeProfit'],
-                'magic_number' => $trade['OrderMagicNumber'],
-                'comment' => $trade['OrderComment'] ?? null,
-                'status' => $trade['OrderStatus'],
-                'open_price' => $trade['OrderOpenPrice'],
-                'open_at' => $trade['OrderOpenTime'],
-                'close_price' => $trade['OrderClosePrice'] ?? null,
-                'close_at' => $trade['OrderCloseTime'] ?? null,
-                'expired_at' => $trade['OrderExpiration'] ?? null,
-                'open_notif_sent' => $isHistorical, // Mark as notified during initial setup
-                'closed_notif_sent' => $isHistorical, // Mark as notified during initial setup
-            ];
+            foreach ($trades as $trade) {
+                $arr[] = [
+                    'account_login_id' => $accountDetails['AccountLogin'],
+                    'ticket' => $abbreviation . $trade['OrderTicket'],
+                    'symbol' => $trade['OrderSymbol'],
+                    'type' => $trade['OrderType'],
+                    'lots' => $trade['OrderLots'],
+                    'commission' => $trade['OrderCommission'],
+                    'profit' => $trade['OrderProfit'],
+                    'stop_loss' => $trade['OrderStopLoss'],
+                    'swap' => $trade['OrderSwap'],
+                    'take_profit' => $trade['OrderTakeProfit'],
+                    'magic_number' => $trade['OrderMagicNumber'],
+                    'comment' => $trade['OrderComment'] ?? null,
+                    'status' => $trade['OrderStatus'],
+                    'open_price' => $trade['OrderOpenPrice'],
+                    'open_at' => $trade['OrderOpenTime'],
+                    'close_price' => $trade['OrderClosePrice'] ?? null,
+                    'close_at' => $trade['OrderCloseTime'] ?? null,
+                    'expired_at' => $trade['OrderExpiration'] ?? null,
+                    'open_notif_sent' => $isHistorical, // Mark as notified during initial setup
+                    'closed_notif_sent' => $isHistorical, // Mark as notified during initial setup
+                ];
+            }
+
+            Trade::upsert(
+                $arr,
+                ['ticket'],
+                ['account_login_id', 'symbol', 'type', 'lots', 'commission', 'profit', 'stop_loss', 'swap', 'take_profit', 'magic_number', 'comment', 'status', 'open_price', 'open_at', 'close_price', 'close_at', 'expired_at', 'open_notif_sent', 'closed_notif_sent']
+            );
+
+            WebhookCall::create()
+                ->url(env('FOREXSPY_API_URL') . '/webhooks/new-trade-received')
+                ->payload(['event' => 'new-trade-received', 'mt_account_login_id' => $accountDetails['AccountLogin']])
+                ->useSecret(env('WEBHOOK_SECRET'))
+                ->dispatchIf(!$isHistorical);
         }
-
-        Trade::upsert(
-            $arr,
-            ['ticket'],
-            ['account_login_id', 'symbol', 'type', 'lots', 'commission', 'profit', 'stop_loss', 'swap', 'take_profit', 'magic_number', 'comment', 'status', 'open_price', 'open_at', 'close_price', 'close_at', 'expired_at', 'open_notif_sent', 'closed_notif_sent']
-        );
 
         // Webhooks
         WebhookCall::create()
@@ -100,11 +108,6 @@ class TradeService
             ->useSecret(env('WEBHOOK_SECRET'))
             ->dispatchIf($isHistorical);
 
-        WebhookCall::create()
-            ->url(env('FOREXSPY_API_URL') . '/webhooks/new-trade-received')
-            ->payload(['event' => 'new-trade-received', 'mt_account_login_id' => $accountDetails['AccountLogin']])
-            ->useSecret(env('WEBHOOK_SECRET'))
-            ->dispatchIf(!$isHistorical);
 
         return $request->all(); // Return the exact data back to MT4
     }
