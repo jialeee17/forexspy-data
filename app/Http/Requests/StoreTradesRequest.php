@@ -2,12 +2,11 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\MarginSOModesEnum;
 use App\Enums\OrderTypesEnum;
 use App\Enums\TradeModesEnum;
-use App\Models\OpenTrade;
-use App\Models\CloseTrade;
 use Illuminate\Validation\Rule;
+use App\Enums\MarginSOModesEnum;
+use App\Enums\OrderStatusesEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -30,7 +29,7 @@ class StoreTradesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'forexspy_user_uuid' => 'required|uuid',
+            'forexspy_user_uuid' => ['required', 'uuid'],
 
             'account' => ['required', 'array'],
             'account.AccountLogin' => ['required', 'integer'],
@@ -65,41 +64,24 @@ class StoreTradesRequest extends FormRequest
             'account.AccountCurrency' => ['required', 'string'],
             'account.AccountCompany' => ['required', 'string'],
 
-            'open' => ['nullable', 'array'],
-            'open.*.OrderTicket' => ['required'],
-            'open.*.OrderSymbol' => ['required', 'string'],
-            'open.*.OrderType' => ['required', Rule::enum(OrderTypesEnum::class)],
-            'open.*.OrderLots' => ['required', 'numeric'],
-            'open.*.OrderCommission' => ['required', 'numeric'],
-            'open.*.OrderProfit' => ['required', 'numeric'],
-            'open.*.OrderStopLoss' => ['required', 'numeric'],
-            'open.*.OrderSwap' => ['required', 'numeric'],
-            'open.*.OrderTakeProfit' => ['required', 'numeric'],
-            'open.*.OrderMagicNumber' => ['required'],
-            'open.*.OrderComment' => ['nullable', 'string'],
-            'open.*.OrderOpenPrice' => ['required', 'numeric'],
-            'open.*.OrderOpenTime' => ['required'],
-            'open.*.OrderClosePrice' => ['nullable', 'numeric'],
-            'open.*.OrderCloseTime' => ['nullable'],
-            'open.*.OrderExpiration' => ['nullable'],
-
-            'close' => ['nullable', 'array'],
-            'close.*.OrderTicket' => ['required'],
-            'close.*.OrderSymbol' => ['required', 'string'],
-            'close.*.OrderType' => ['required', Rule::enum(OrderTypesEnum::class)],
-            'close.*.OrderLots' => ['required', 'numeric'],
-            'close.*.OrderCommission' => ['required', 'numeric'],
-            'close.*.OrderProfit' => ['required', 'numeric'],
-            'close.*.OrderStopLoss' => ['required', 'numeric'],
-            'close.*.OrderSwap' => ['required', 'numeric'],
-            'close.*.OrderTakeProfit' => ['required', 'numeric'],
-            'close.*.OrderMagicNumber' => ['required'],
-            'close.*.OrderComment' => ['nullable', 'string'],
-            'close.*.OrderOpenPrice' => ['required', 'numeric'],
-            'close.*.OrderOpenTime' => ['required'],
-            'close.*.OrderClosePrice' => ['required', 'numeric'],
-            'close.*.OrderCloseTime' => ['required'],
-            'close.*.OrderExpiration' => ['nullable'],
+            'trades' => ['nullable', 'array'],
+            'trades.*.OrderTicket' => ['required'],
+            'trades.*.OrderSymbol' => ['required', 'string'],
+            'trades.*.OrderType' => ['required', Rule::enum(OrderTypesEnum::class)],
+            'trades.*.OrderLots' => ['required', 'numeric'],
+            'trades.*.OrderCommission' => ['required', 'numeric'],
+            'trades.*.OrderProfit' => ['required', 'numeric'],
+            'trades.*.OrderStopLoss' => ['required', 'numeric'],
+            'trades.*.OrderSwap' => ['required', 'numeric'],
+            'trades.*.OrderTakeProfit' => ['required', 'numeric'],
+            'trades.*.OrderMagicNumber' => ['required'],
+            'trades.*.OrderComment' => ['nullable', 'string'],
+            'trades.*.Status' => ['required', Rule::enum(OrderStatusesEnum::class)],
+            'trades.*.OrderOpenPrice' => ['required', 'numeric'],
+            'trades.*.OrderOpenTime' => ['required'],
+            'trades.*.OrderClosePrice' => ['nullable', 'numeric'],
+            'trades.*.OrderCloseTime' => ['nullable'],
+            'trades.*.OrderExpiration' => ['nullable'],
         ];
     }
 
@@ -140,48 +122,23 @@ class StoreTradesRequest extends FormRequest
             'account.AccountCurrency' => 'Account Currency',
             'account.AccountCompany' => 'Account Company',
 
-            'open.*.OrderTicket' => 'Order Ticket (Open)',
-            'open.*.OrderSymbol' => 'Order Symbol (Open)',
-            'open.*.OrderType' => 'Order Type (Open)',
-            'open.*.OrderLots' => 'Order Lots (Open)',
-            'open.*.OrderCommission' => 'Order Commission (Open)',
-            'open.*.OrderProfit' => 'Order Profit (Open Trade)',
-            'open.*.OrderStopLoss' => 'Order Stop Loss (Open)',
-            'open.*.OrderSwap' => 'Order Swap (Open)',
-            'open.*.OrderTakeProfit' => 'Order Take Profit (Open)',
-            'open.*.OrderMagicNumber' => 'Order Magic Number (Open)',
-            'open.*.OrderComment' => 'Order Comment (Open)',
-            'open.*.OrderOpenPrice' => 'Order Open Price (Open)',
-            'open.*.OrderOpenTime' => 'Order Open Time (Open)',
-            'open.*.OrderClosePrice' => 'Order Close Price (Open)',
-            'open.*.OrderCloseTime' => 'Order Close Time (Open)',
-            'open.*.OrderExpiration' => 'Order Expiration Date (Open)',
-
-            'close.*.OrderTicket' => 'Order Ticket (Close)',
-            'close.*.OrderSymbol' => 'Order Symbol (Close)',
-            'close.*.OrderType' => 'Order Type (Close)',
-            'close.*.OrderLots' => 'Order Lots (Close)',
-            'close.*.OrderCommission' => 'Order Commission (Close)',
-            'close.*.OrderProfit' => 'Order Profit (Close)',
-            'close.*.OrderStopLoss' => 'Order Stop Loss (Close)',
-            'close.*.OrderSwap' => 'Order Swap (Close)',
-            'close.*.OrderTakeProfit' => 'Order Take Profit (Close)',
-            'close.*.OrderMagicNumber' => 'Order Magic Number (Close)',
-            'close.*.OrderComment' => 'Order Comment (Close)',
-            'close.*.OrderOpenPrice' => 'Order Open Price (Close)',
-            'close.*.OrderOpenTime' => 'Order Open Time (Close)',
-            'close.*.OrderClosePrice' => 'Order Close Price (Close)',
-            'close.*.OrderCloseTime' => 'Order Close Time (Close)',
-            'close.*.OrderExpiration' => 'Order Expiration Date (Close)',
+            'trades.*.OrderTicket' => 'Order Ticket (Open)',
+            'trades.*.OrderSymbol' => 'Order Symbol (Open)',
+            'trades.*.OrderType' => 'Order Type (Open)',
+            'trades.*.OrderLots' => 'Order Lots (Open)',
+            'trades.*.OrderCommission' => 'Order Commission (Open)',
+            'trades.*.OrderProfit' => 'Order Profit (Open Trade)',
+            'trades.*.OrderStopLoss' => 'Order Stop Loss (Open)',
+            'trades.*.OrderSwap' => 'Order Swap (Open)',
+            'trades.*.OrderTakeProfit' => 'Order Take Profit (Open)',
+            'trades.*.OrderMagicNumber' => 'Order Magic Number (Open)',
+            'trades.*.OrderComment' => 'Order Comment (Open)',
+            'trades.*.Status' => 'Order Status',
+            'trades.*.OrderOpenPrice' => 'Order Open Price (Open)',
+            'trades.*.OrderOpenTime' => 'Order Open Time (Open)',
+            'trades.*.OrderClosePrice' => 'Order Close Price (Open)',
+            'trades.*.OrderCloseTime' => 'Order Close Time (Open)',
+            'trades.*.OrderExpiration' => 'Order Expiration Date (Open)',
         ];
     }
-
-    // public function failedValidation(Validator $validator)
-    // {
-    //     throw new HttpResponseException(response()->json([
-    //         'success'   => false,
-    //         'message'   => 'Validation errors',
-    //         'data'      => $validator->errors()
-    //     ]));
-    // }
 }

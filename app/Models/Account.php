@@ -11,7 +11,7 @@ class Account extends Model
 
     protected $fillable = [
         'login_id',
-        'telegram_user_uuid',
+        'forexspy_user_uuid',
         'trade_mode',
         'leverage',
         'limit_orders',

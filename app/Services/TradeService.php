@@ -3,28 +3,28 @@
 namespace App\Services;
 
 use App\Helper;
+use App\Models\Trade;
 use App\Models\Account;
 use App\Models\OpenTrade;
 use App\Models\CloseTrade;
+use Spatie\WebhookServer\WebhookCall;
 
 class TradeService
 {
     public function storeTrades($request)
     {
-        $telegramUserUuid = $request->forexspy_user_uuid;
+        $forexspyUserUuid = $request->forexspy_user_uuid;
         $accountDetails = $request->account;
-        $openTrades = $request->open;
-        $closeTrades = $request->close;
-        $hasClosedTrades = !empty($closeTrades) ? 1 : 0;
-        $isHistorical = $request->is_historical === 'true' ? 1 : 0;
-        $abbreviation = Helper::generateAbbreviation($accountDetails['AccountCompany']);
+        $trades = $request->trades;
+        $isHistorical = $request->is_historical === 'true' ? true : false; // The account's trade history (Use for initial setup)
 
-        $account = Account::updateOrCreate(
+        // Upsert Account Details
+        Account::updateOrCreate(
             [
                 'login_id' => $accountDetails['AccountLogin'],
             ],
             [
-                'telegram_user_uuid' => $telegramUserUuid,
+                'forexspy_user_uuid' => $forexspyUserUuid,
                 'trade_mode' => $accountDetails['AccountTradeMode'],
                 'leverage' => $accountDetails['AccountLeverage'],
                 'limit_orders' => $accountDetails['AccountLimitOrders'],
@@ -58,30 +58,14 @@ class TradeService
             ]
         );
 
-        $data = [
-            'account' => $account,
-            'open_trade' => $this->upsertTrades($openTrades, $accountDetails['AccountLogin'], $telegramUserUuid, $abbreviation, $isHistorical, OpenTrade::class),
-            'close_trade' => $this->upsertTrades($closeTrades, $accountDetails['AccountLogin'], $telegramUserUuid, $abbreviation, $isHistorical, CloseTrade::class)
-        ];
-
-        /**
-         * The 'has_closed_trades' flag determines if querying for unnotified close trades is needed within the Forex Spy Process.
-         * If the incoming data does not include close trades, there is no need to notify the user.
-         */
-        Helper::sendWebhook(['account' => $data['account'], 'has_closed_trades' => $hasClosedTrades, 'is_historical' => $isHistorical]);
-
-        return $data;
-    }
-
-    protected function upsertTrades($trades, $loginId, $telegramUserUuid, $companyAbbreviation, $isHistorical, $model)
-    {
+        // Upsert Trades
         $arr = [];
+        $abbreviation = Helper::generateAbbreviation($accountDetails['AccountCompany']);
 
         foreach ($trades as $trade) {
             $arr[] = [
-                'login_id' => $loginId,
-                'telegram_user_uuid' => $telegramUserUuid,
-                'ticket' => $companyAbbreviation . $trade['OrderTicket'],
+                'account_login_id' => $accountDetails['AccountLogin'],
+                'ticket' => $abbreviation . $trade['OrderTicket'],
                 'symbol' => $trade['OrderSymbol'],
                 'type' => $trade['OrderType'],
                 'lots' => $trade['OrderLots'],
@@ -97,16 +81,30 @@ class TradeService
                 'close_price' => $trade['OrderClosePrice'] ?? null,
                 'close_at' => $trade['OrderCloseTime'] ?? null,
                 'expired_at' => $trade['OrderExpiration'] ?? null,
-                'is_notified' => $isHistorical ? 1 : 0
+                'open_notif_sent' => $isHistorical, // Mark as notified during initial setup
+                'closed_notif_sent' => $isHistorical, // Mark as notified during initial setup
             ];
         }
 
-        $model::upsert(
+        Trade::upsert(
             $arr,
             ['ticket'],
-            ['login_id', 'telegram_user_uuid', 'symbol', 'type', 'lots', 'commission', 'profit', 'stop_loss', 'swap', 'take_profit', 'magic_number', 'comment', 'open_price', 'open_at', 'close_price', 'close_at', 'expired_at']
+            ['account_login_id', 'symbol', 'type', 'lots', 'commission', 'profit', 'stop_loss', 'swap', 'take_profit', 'magic_number', 'comment', 'status', 'open_price', 'open_at', 'close_price', 'close_at', 'expired_at', 'open_notif_sent', 'closed_notif_sent']
         );
 
-        return $trades;
+        // Webhooks
+        WebhookCall::create()
+            ->url(env('FOREXSPY_API_URL') . '/webhooks/trade-history-received')
+            ->payload(['event' => 'trade-history-received', 'mt_account_login_id' => $accountDetails['AccountLogin']])
+            ->useSecret(env('WEBHOOK_SECRET'))
+            ->dispatchIf($isHistorical);
+
+        WebhookCall::create()
+            ->url(env('FOREXSPY_API_URL') . '/webhooks/new-trade-received')
+            ->payload(['event' => 'new-trade-received', 'mt_account_login_id' => $accountDetails['AccountLogin']])
+            ->useSecret(env('WEBHOOK_SECRET'))
+            ->dispatchIf(!$isHistorical);
+
+        return $request->all(); // Return the exact data back to MT4
     }
 }

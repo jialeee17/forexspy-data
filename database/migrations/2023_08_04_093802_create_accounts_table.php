@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('login_id');
-            $table->uuid('telegram_user_uuid');
+            $table->unsignedBigInteger('login_id')->unique();
+            $table->foreignUuid('forexspy_user_uuid');
             $table->enum('trade_mode', ['demo', 'contest', 'real']);
             $table->bigInteger('leverage')->default(0);
             $table->integer('limit_orders')->default(0);
@@ -35,6 +35,12 @@ return new class extends Migration
             $table->decimal('assets', 20, 2)->default(0);
             $table->decimal('liabilities', 20, 2)->default(0);
             $table->decimal('commission_blocked', 20, 2)->default(0);
+            $table->decimal('highest_drawdown_amount', 20, 2)->default(0);
+            $table->decimal('highest_drawdown_percentage', 8, 2)->default(0);
+            $table->integer('active_pairs')->default(0);
+            $table->integer('active_orders')->default(0);
+            $table->decimal('profit_today')->default(0);
+            $table->decimal('profit_all_time')->default(0);
             $table->string('name');
             $table->string('server');
             $table->string('currency');
