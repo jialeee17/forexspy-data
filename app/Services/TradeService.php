@@ -5,8 +5,6 @@ namespace App\Services;
 use App\Helper;
 use App\Models\Trade;
 use App\Models\Account;
-use App\Models\OpenTrade;
-use App\Models\CloseTrade;
 use Spatie\WebhookServer\WebhookCall;
 
 class TradeService
@@ -19,7 +17,7 @@ class TradeService
         $isHistorical = $request->is_historical === 'true' ? true : false; // The account's trade history (Use for initial setup)
 
         // Upsert Account Details
-        Account::updateOrCreate(
+        $account = Account::updateOrCreate(
             [
                 'login_id' => $accountDetails['AccountLogin'],
             ],
@@ -64,7 +62,7 @@ class TradeService
             $abbreviation = Helper::generateAbbreviation($accountDetails['AccountCompany']);
 
             foreach ($trades as $trade) {
-                $arr[] = [
+                $tempArr = [
                     'account_login_id' => $accountDetails['AccountLogin'],
                     'ticket' => $abbreviation . $trade['OrderTicket'],
                     'symbol' => $trade['OrderSymbol'],
@@ -83,20 +81,37 @@ class TradeService
                     'close_price' => $trade['OrderClosePrice'] ?? null,
                     'close_at' => $trade['OrderCloseTime'] ?? null,
                     'expired_at' => $trade['OrderExpiration'] ?? null,
-                    'open_notif_sent' => $isHistorical, // Mark as notified during initial setup
-                    'closed_notif_sent' => $isHistorical, // Mark as notified during initial setup
                 ];
+
+                // Mark as notified during initial setup
+                if ($isHistorical) {
+                    $tempArr['open_notif_sent'] = true;
+                    $tempArr['closed_notif_sent'] = true;
+                }
+
+                $arr[] = $tempArr;
+            }
+
+            $keyShouldUpsert = ['account_login_id', 'symbol', 'type', 'lots', 'commission', 'profit', 'stop_loss', 'swap', 'take_profit', 'magic_number', 'comment', 'status', 'open_price', 'open_at', 'close_price', 'close_at', 'expired_at'];
+
+            if ($isHistorical) {
+                $keyShouldUpsert[] = 'open_notif_sent';
+                $keyShouldUpsert[] = 'closed_notif_sent';
             }
 
             Trade::upsert(
                 $arr,
                 ['ticket'],
-                ['account_login_id', 'symbol', 'type', 'lots', 'commission', 'profit', 'stop_loss', 'swap', 'take_profit', 'magic_number', 'comment', 'status', 'open_price', 'open_at', 'close_price', 'close_at', 'expired_at', 'open_notif_sent', 'closed_notif_sent']
+                $keyShouldUpsert
             );
 
             WebhookCall::create()
                 ->url(env('FOREXSPY_API_URL') . '/webhooks/new-trade-received')
-                ->payload(['event' => 'new-trade-received', 'mt_account_login_id' => $accountDetails['AccountLogin']])
+                ->payload([
+                    'event' => 'new-trade-received',
+                    'forexspy_user_uuid' => $forexspyUserUuid,
+                    // 'trades' => $arr,
+                ])
                 ->useSecret(env('WEBHOOK_SECRET'))
                 ->dispatchIf(!$isHistorical);
         }
@@ -104,7 +119,11 @@ class TradeService
         // Webhooks
         WebhookCall::create()
             ->url(env('FOREXSPY_API_URL') . '/webhooks/trade-history-received')
-            ->payload(['event' => 'trade-history-received', 'mt_account_login_id' => $accountDetails['AccountLogin']])
+            ->payload([
+                'event' => 'trade-history-received',
+                'forexspy_user_uuid' => $forexspyUserUuid,
+                'mt_account' => $account,
+            ])
             ->useSecret(env('WEBHOOK_SECRET'))
             ->dispatchIf($isHistorical);
 
