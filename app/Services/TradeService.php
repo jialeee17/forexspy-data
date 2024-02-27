@@ -110,7 +110,6 @@ class TradeService
                 ->payload([
                     'event' => 'new-trade-received',
                     'forexspy_user_uuid' => $forexspyUserUuid,
-                    // 'trades' => $arr,
                 ])
                 ->useSecret(env('WEBHOOK_SECRET'))
                 ->dispatchIf(!$isHistorical);
